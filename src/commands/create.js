@@ -88,7 +88,6 @@ function createTemplate(cwd, templateData = {}) {
         if (!chunk.stat.isFile()) {
             return cb();
         }
-        info('create', chunk.path.replace(cwd + '/', ''));
 
         const parts = chunk.path.split(sep);
         const oldName = parts.pop();
@@ -100,6 +99,8 @@ function createTemplate(cwd, templateData = {}) {
                 parseTemplate(chunk.contents.toString(), templateData)
             );
         }
+
+        info('create', chunk.path.replace(cwd + '/', ''));
 
         this.push(chunk);
         cb();

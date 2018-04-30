@@ -1,6 +1,6 @@
 {
   "name": "sm-fe-tool",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "sm webpack tool",
   "bin": {
     "sm": "./bin/sm"
