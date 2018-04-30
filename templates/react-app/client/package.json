@@ -1,0 +1,31 @@
+{
+  "name": "client",
+  "dependencies": {
+    "antd": "^3.4.1",
+    "axios": "^0.16.2",
+    "classnames": "^2.2.5",
+    "echarts": "^4.0.4",
+    "expose-loader": "^0.7.5",
+    "history": "^4.7.2",
+    "jquery": "^3.3.1",
+    "leaflet": "^1.3.1",
+    "moment": "^2.18.1",
+    "proj4": "^2.4.4",
+    "prop-types": "^15.5.10",
+    "qrcode.react": "^0.8.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-hot-loader": "^4.1.2",
+    "react-redux": "^5.0.6",
+    "react-router-dom": "^4.2.2",
+    "react-router-redux": "^5.0.0-alpha.8",
+    "redux": "^3.7.2",
+    "redux-saga": "^0.15.6",
+    "soap": "0.13.0",
+    "socket.io-client": "^2.0.4"
+  },
+  "devDependencies": {
+    "react-hot-loader": "^3.1.3",
+    "redux-logger": "^3.0.6"
+  }
+}
