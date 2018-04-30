@@ -12,7 +12,8 @@
   },
   "files": [
     "templates",
-    "lib"
+    "lib",
+    "bin"
   ],
   "keywords": [
     "webpack",
