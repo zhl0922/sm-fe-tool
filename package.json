@@ -1,0 +1,78 @@
+{
+  "name": "sm-fe-tool",
+  "version": "1.0.0",
+  "description": "sm webpack tool",
+  "bin": {
+    "sm": "./lib/bin/sm.js"
+  },
+  "scripts": {
+    "build": "rimraf lib && babel src --out-dir lib --quiet",
+    "build:watch": "rimraf lib && babel src --watch --out-dir lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "templates",
+    "lib"
+  ],
+  "keywords": [
+    "webpack",
+    "tool"
+  ],
+  "author": "zhoulang",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "rimraf": "^2.6.2"
+  },
+  "dependencies": {
+    "archiver": "^2.1.1",
+    "autoprefixer": "^8.3.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "babel-plugin-syntax-jsx": "^6.18.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.13",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-preset-stage-1": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
+    "babel-runtime": "^6.26.0",
+    "chalk": "^2.4.0",
+    "compression-webpack-plugin": "^1.1.11",
+    "copy-webpack-plugin": "^4.5.1",
+    "css-loader": "^0.28.11",
+    "empty-dir": "^1.0.0",
+    "file-loader": "^1.1.11",
+    "friendly-errors-webpack-plugin": "^1.7.0",
+    "fs-extra": "^5.0.0",
+    "happypack": "^5.0.0-beta.1",
+    "inquirer": "^5.2.0",
+    "left-pad": "^1.3.0",
+    "less": "^2.7.3",
+    "less-loader": "^4.1.0",
+    "mini-css-extract-plugin": "^0.4.0",
+    "minimist": "^1.2.0",
+    "nodemon": "^1.17.3",
+    "optimize-css-assets-webpack-plugin": "^4.0.0",
+    "ora": "^2.0.0",
+    "postcss-loader": "^2.1.4",
+    "progress-bar-webpack-plugin": "^1.11.0",
+    "style-loader": "^0.21.0",
+    "through2": "^2.0.3",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "url-loader": "^1.0.1",
+    "vinyl-fs": "^3.0.2",
+    "webpack": "^4.6.0",
+    "webpack-dev-server": "^3.1.3",
+    "webpack-merge": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=6.11.2"
+  }
+}
