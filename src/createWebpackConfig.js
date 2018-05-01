@@ -118,12 +118,11 @@ export default function createWebpackConfig(userConfig, externalConfig = {}) {
             entry: userEntry,
             publicPath = DEFAULT_PUBLIC_PATH,
             outputPath = DEFAULT_OUTPUT_PATH,
-            alias,
+            resolve: userResolve,
             copy,
             define,
             extractCss = true,
             externals,
-            extensions,
             plugins: userPlugins = [],
             rules: userRules = [],
             noParse,
@@ -155,12 +154,12 @@ export default function createWebpackConfig(userConfig, externalConfig = {}) {
         publicPath
     };
 
-    let resolveConfig = { extensions: ['.js', '.jsx', '.less', '.css'] };
-    if (extensions) {
-        resolveConfig.extensions = [...resolveConfig, extensions];
-    }
-    if (alias) {
-        resolveConfig.alias = alias;
+    let resolveConfig = {
+        modules: ['node_modules'],
+        extensions: ['.js', '.jsx', '.less', '.css']
+    };
+    if (userResolve) {
+        resolveConfig = merge(resolveConfig, userResolve)
     }
 
     let config = {

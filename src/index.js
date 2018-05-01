@@ -50,7 +50,7 @@ commands:
     Build project
 
   ${green('sm build-zip')}
-    Build zip for project
+    Build zip for project in 'project/release/xxx.zip'
 `)
     process.exit(args.help || command ? 0 : 1);
 }

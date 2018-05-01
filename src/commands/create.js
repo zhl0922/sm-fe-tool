@@ -67,7 +67,7 @@ export default async function create(args) {
         }
         console.log(`Creating new project in ${dest}.`);
 
-        vfs.src(['**/*', '!node_modules/**/*'], { cwd, cwdbase: true, dot: true })
+        vfs.src(['**/*', '!node_modules/**/*'], { cwd, cwdbase: true, dot: false })
             .pipe(createTemplate(cwd, {
                 projectName,
                 projectType,
@@ -76,7 +76,7 @@ export default async function create(args) {
             }))
             .pipe(vfs.dest(dest))
             .on('end', function () {
-                console.log(`${chalk.cyan.bold(leftPad('succeeded', 12))}`);
+                // console.log(`${chalk.cyan.bold(leftPad('succeeded', 12))}`);
             })
             .resume();
     } catch (e) {
@@ -99,7 +99,6 @@ function createTemplate(cwd, templateData = {}) {
                 parseTemplate(chunk.contents.toString(), templateData)
             );
         }
-
         info('create', chunk.path.replace(cwd + '/', ''));
 
         this.push(chunk);

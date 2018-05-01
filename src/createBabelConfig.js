@@ -1,6 +1,7 @@
 import merge from 'webpack-merge';
 import { DEFAULT_STAGE, DEFAULT_BROWSERS } from './constant';
 import { typeOf, error, resolve } from './utils';
+import path from 'path';
 export default function createBabelConfig(userConfig, externalConfig = {}) {
     const {
         type,
@@ -18,7 +19,7 @@ export default function createBabelConfig(userConfig, externalConfig = {}) {
 
     presets.push(
         [
-            resolve('babel-preset-env'),
+            resolve('@babel/preset-env'),
             {
                 modules: false,
                 targets: {
@@ -27,14 +28,27 @@ export default function createBabelConfig(userConfig, externalConfig = {}) {
             },
         ]
     );
-    plugins.push(resolve('babel-plugin-transform-runtime'));
-    plugins.push(resolve('babel-plugin-syntax-dynamic-import'));
+    plugins.push([
+        resolve('@babel/plugin-transform-runtime'), 
+        {
+            moduleName: path.dirname(resolve('@babel/runtime/package'))
+        }
+    ]);
+    plugins.push(resolve('@babel/plugin-syntax-dynamic-import'));
 
     let stage = userStage != null ? userStage : DEFAULT_STAGE;
     if (typeOf(stage) === 'number') {
-        presets.push(resolve(`babel-preset-stage-${stage}`));
+        const stagePlugin = resolve(`@babel/preset-stage-${stage}`);
         if (stage <= 2) {
-            plugins.push(resolve('babel-plugin-transform-decorators-legacy'));
+            presets.push(
+                [
+                    stagePlugin,
+                    { decoratorsLegacy: true }
+                ]
+            );
+            // plugins.push(resolve('babel-plugin-transform-decorators-legacy'));
+        } else {
+            presets.push(stagePlugin);
         }
     }
     

@@ -1,6 +1,6 @@
 {
     "apps": [{
-        "name": "tocc-xingyi-dispatch",
+        "name": "{{projectName}}",
         "script": "./www",
         "watch": false,
         "node_args": "--harmony",
@@ -9,6 +9,9 @@
         "instances": 1,
         "exec_mode": "cluster",
         "error_file": "/dev/null",
-        "out_file": "/dev/null"
+        "out_file": "/dev/null",
+        "env": {
+            "NODE_ENV": "production"
+        }
     }]
 }
