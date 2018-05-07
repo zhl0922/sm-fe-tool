@@ -5,12 +5,12 @@
 全局安装
 
 ```sh
-npm install -g git+http://192.168.80.129/common/platform/sm-fe-tool.git
+npm install -g sm-fe-tool
 ```
 在项目中安装，并在项目package.json script 中添加
 
 ```sh
-npm install --save-dev git+http://192.168.80.129/common/platform/sm-fe-tool.git
+npm install --save-dev sm-fe-tool
 ```
 ```json
 {
