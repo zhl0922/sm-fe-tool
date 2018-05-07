@@ -1,5 +1,5 @@
-import webpackDevServer from '../webpackDevServer';
+import { run } from '../commands';
 import config from '../configs/react-app';
 export default function runReactApp(args) {
-    return webpackDevServer(args, config());
+    return run(args, config());
 }

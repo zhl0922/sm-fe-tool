@@ -54,8 +54,6 @@ export function getUserConfig(args = {}) {
         }
     });
     
-    userConfig.args = args;
-    
     return userConfig;
 }
 

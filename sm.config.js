@@ -26,6 +26,7 @@
         outputPath: 'client/dist',
         entry: './client/src/main.js',
         publicPath: process.env.NODE_ENV == 'production' ? 'http://' : '/',
+        library: 'example',
         resolve: {
             alias: { '@': SRC_DIR },
         },

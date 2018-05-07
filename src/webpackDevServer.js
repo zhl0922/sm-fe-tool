@@ -1,13 +1,9 @@
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
-import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin';
-import ProgressBarPlugin from 'progress-bar-webpack-plugin';
-import chalk from 'chalk';
-import path from 'path';
-import createDevWebpackConfig from './createDevWebpackConfig';
+import createWebpackConfig from './createWebpackConfig';
 import { getUserConfig } from './user';
-import { error, info, resolve } from './utils';
-import { DEFAULT_DEV_SERVER_PORT, DEFAULT_DEV_SERVER_HOST } from './constant';
+import { error, typeOf } from './utils';
+
 
 function devServer(webpackConfig, serverConfig) {
 
@@ -44,49 +40,21 @@ function devServer(webpackConfig, serverConfig) {
     })
 }
 
-function getHMRClientEntries(host, port) {
-    const hmrURL = `http://${host}:${port}/`;
-    return [
-        `${resolve('webpack-dev-server/client/')}?${hmrURL}`,
-        resolve('webpack/hot/dev-server')
-    ];
-}
-
-export default function webpackDevServer(args, externalConfig) {
+export default function webpackDevServer(args, serverConfig, buildConfig) {
     process.env.NODE_ENV = 'development';
-    const cwd = process.cwd();
+
     const userConfig = getUserConfig(args);
-    const host = DEFAULT_DEV_SERVER_HOST;
 
-    let {
-        publicPath,
-        args: {
-            port = DEFAULT_DEV_SERVER_PORT
-        }
-    } = userConfig;
+    if (typeOf(buildConfig) === 'function') {
+        buildConfig = buildConfig(userConfig);
+    }
+    
+    const webpackConfig = createWebpackConfig(userConfig, buildConfig);
 
-    publicPath = publicPath || `http://${host}:${port}/`;
-    const webpackConfig = createDevWebpackConfig(userConfig, {
-        entry: getHMRClientEntries(host, port),
-        output: {
-            publicPath
-        },
-        plugins: [
-            new ProgressBarPlugin({
-                format: chalk.cyan('building [:bar]:percent'),
-                summary: false
-            }),
-            new FriendlyErrorsPlugin({
-                compilationSuccessInfo: {
-                    messages: [`app is running at ${publicPath}`],
-                }
-            })
-        ],
-        ...externalConfig
-    });
+    if (userConfig.webpack.publicPath) {
+        webpackConfig.output.publicPath = userConfig.webpack.publicPath;
+    }
+    // console.log(JSON.stringify(webpackConfig, null, 4))
 
-    devServer(webpackConfig, {
-        port,
-        host: DEFAULT_DEV_SERVER_HOST
-    });
+    devServer(webpackConfig, serverConfig);
 }

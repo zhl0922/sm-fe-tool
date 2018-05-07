@@ -1,6 +1,7 @@
 export const CONFIG_FILE_NAME = 'sm.config.js';
 export const REACT_APP = 'react-app';
-export const PROJECT_TYPES = [REACT_APP];
+export const REACT_COMPONENT = 'react-component';
+export const PROJECT_TYPES = [REACT_APP, REACT_COMPONENT];
 export const COMMANDS = ['dev-server', 'build', 'create', 'node-server', 'build-zip'];
 export const DEFAULT_STAGE = 2;
 export const DEFAULT_PUBLIC_PATH = '/';

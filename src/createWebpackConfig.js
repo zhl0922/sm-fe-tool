@@ -3,14 +3,22 @@ import merge from 'webpack-merge';
 import CopyPlugin from 'copy-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import CompressionWebpackPlugin from 'compression-webpack-plugin';
+import ProgressBarPlugin from 'progress-bar-webpack-plugin';
 import autoprefixer from 'autoprefixer';
 import HappyPack from 'happypack';
 import path from 'path';
+import chalk from 'chalk';
 
 import createBabelConfig from './createBabelConfig';
 import createResourceMap from './createResourceMap';
 import { error, resolve, typeOf, processEntry } from './utils';
-import { DEFAULT_BROWSERS, DEFAULT_PUBLIC_PATH, DEFAULT_OUTPUT_PATH } from './constant';
+import {
+    DEFAULT_BROWSERS,
+    DEFAULT_PUBLIC_PATH,
+    DEFAULT_OUTPUT_PATH,
+    COMMON_CHUNK_NAME,
+    RUNTIME_CHUNK_NAME
+} from './constant';
 
 import os from 'os';
 
@@ -87,14 +95,14 @@ function createStyleRules(options) {
     return output;
 }
 
-function createBaseRules() {
+function createBaseRules(isModule) {
     return [
         {
             test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
             loader: resolve('url-loader'),
             options: {
                 limit: 10000,
-                name: 'img/[name].[hash:7].[ext]',
+                name: isModule ? 'assets/[name].[ext]' : 'img/[name].[hash:7].[ext]',
                 fallback: resolve('file-loader')
             }
         },
@@ -103,26 +111,28 @@ function createBaseRules() {
             loader: resolve('url-loader'),
             options: {
                 limit: 10000,
-                name: 'fonts/[name].[hash:7].[ext]',
+                name: isModule ? 'assets/[name].[ext]' : 'fonts/[name].[hash:7].[ext]',
                 fallback: resolve('file-loader')
             }
         }
     ];
 }
-export default function createWebpackConfig(userConfig, externalConfig = {}) {
+export default function createWebpackConfig(userConfig, buildConfig = {}) {
     const isProduction = process.env.NODE_ENV === 'production';
     const cwd = process.cwd();
     let {
         browsers = DEFAULT_BROWSERS,
         webpack: {
             entry: userEntry,
+            library: userLibrary,
+            libraryTarget: userLibraryTarget,
             publicPath = DEFAULT_PUBLIC_PATH,
             outputPath = DEFAULT_OUTPUT_PATH,
             resolve: userResolve,
             copy,
             define,
-            extractCss = true,
-            externals,
+            extractCss,
+            externals: userExternals,
             plugins: userPlugins = [],
             rules: userRules = [],
             noParse,
@@ -132,27 +142,21 @@ export default function createWebpackConfig(userConfig, externalConfig = {}) {
     } = userConfig;
 
     let {
-        babel,
-        entry: externalEntry = [],
-        output: externalOutput,
-        ...otherExternalConfig
-    } = externalConfig;
-
-    extractCss = isProduction && extractCss;
+        babel: buildBabelConfig,
+        entry: buildEntry = [],
+        isModule,
+        splitChunks,
+        progress,
+        resourceMap,
+        ...extraConfig
+    } = buildConfig;
 
     if (!userEntry) {
         error('webpack.entry can not find');
         process.exit(1);
     }
-    const entry = processEntry(userEntry, externalEntry);
 
     outputPath = path.join(cwd, outputPath);
-
-    const output = {
-        path: outputPath,
-        filename: 'js/[name].js',
-        publicPath
-    };
 
     let resolveConfig = {
         modules: ['node_modules'],
@@ -164,10 +168,11 @@ export default function createWebpackConfig(userConfig, externalConfig = {}) {
 
     let config = {
         mode: isProduction ? 'production' : 'development',
-        entry,
+        entry: processEntry(userEntry, buildEntry),
         output: {
-            ...output,
-            ...externalOutput
+            path: outputPath,
+            filename: 'js/[name].js',
+            publicPath
         },
         resolve: resolveConfig,
         module: {
@@ -177,7 +182,7 @@ export default function createWebpackConfig(userConfig, externalConfig = {}) {
                     extractCss,
                     browsers
                 }),
-                ...createBaseRules()
+                ...createBaseRules(isModule)
             ]
         },
         plugins: [
@@ -185,12 +190,44 @@ export default function createWebpackConfig(userConfig, externalConfig = {}) {
             createHappyInstance('less'),
             createHappyInstance('babel', {
                 cacheDirectory: true,
-                ...createBabelConfig(userConfig, babel)
+                babelrc: false,
+                ...createBabelConfig(userConfig, buildBabelConfig)
             }),
         ]
     };
 
-    config = merge(config, otherExternalConfig);
+    if (userLibrary) {
+        config.output.library = userLibrary;
+    }
+    if (userLibraryTarget) {
+        config.output.libraryTarget = userLibraryTarget;
+    }
+
+    if (splitChunks) {
+        config.optimization = config.optimization || {};
+        config.optimization.splitChunks = {
+            cacheGroups: {
+                    vendors: {
+                        chunks: 'all',
+                        name: COMMON_CHUNK_NAME,
+                        test: /[\\/]node_modules[\\/]/,
+                        enforce: true
+                    }
+                }
+        };
+        config.optimization.runtimeChunk = {
+            name: RUNTIME_CHUNK_NAME
+        };
+    }
+
+    if (progress) {
+        config.plugins.push(
+            new ProgressBarPlugin({
+                format: chalk.cyan('building [:bar]:percent'),
+                summary: false
+            })
+        );
+    }
 
     if (noParse) {
         config.module.noParse = noParse;
@@ -202,10 +239,14 @@ export default function createWebpackConfig(userConfig, externalConfig = {}) {
 
     if (extractCss) {
         config.plugins.push(
-            new MiniCssExtractPlugin({
-                filename: 'css/[name].[contenthash].css',
-                chunkFilename: 'css/[name].[contenthash].css'
-            })
+            new MiniCssExtractPlugin(
+                isModule ? {
+                    filename: 'index.css'
+                } : {
+                        filename: 'css/[name].[contenthash].css',
+                        chunkFilename: 'css/[name].[contenthash].css'
+                    }
+            )
         );
     }
 
@@ -233,15 +274,23 @@ export default function createWebpackConfig(userConfig, externalConfig = {}) {
         );
     }
 
-    if (externals) {
-        config.externals = externals;
+    if (userExternals) {
+        config.externals = config.externals || {};
+        config.externals = {
+            ...config.externals,
+            ...userExternals
+        };
     }
 
     config.plugins.push(...userPlugins);
     config.module.rules.push(...userRules);
 
-    config.plugins.push(createResourceMap(outputPath));
+    config = merge(config, extraConfig);
 
+    if (resourceMap) {
+        config.plugins.push(createResourceMap(outputPath));
+    }
+    
     if (typeOf(userConfigFn) === 'function') {
         config = userConfigFn(config);
         if (!config) {
@@ -249,6 +298,6 @@ export default function createWebpackConfig(userConfig, externalConfig = {}) {
             process.exit(1);
         }
     }
-    
+
     return config;
 }

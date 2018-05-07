@@ -17,6 +17,12 @@ export default function createBabelConfig(userConfig, externalConfig = {}) {
     let plugins = [];
     let presets = [];
 
+    const {
+        runtime,
+        dynamicImport,
+        ...otherExternalConfig
+    } = externalConfig
+
     presets.push(
         [
             resolve('@babel/preset-env'),
@@ -28,14 +34,19 @@ export default function createBabelConfig(userConfig, externalConfig = {}) {
             },
         ]
     );
-    plugins.push([
-        resolve('@babel/plugin-transform-runtime'), 
-        {
-            moduleName: path.dirname(resolve('@babel/runtime/package'))
-        }
-    ]);
-    plugins.push(resolve('@babel/plugin-syntax-dynamic-import'));
+    if (runtime) {
+        plugins.push([
+            resolve('@babel/plugin-transform-runtime'),
+            {
+                moduleName: path.dirname(resolve('@babel/runtime/package'))
+            }
+        ]);
+    }
 
+    if (dynamicImport) {
+        plugins.push(resolve('@babel/plugin-syntax-dynamic-import'));
+    }
+    
     let stage = userStage != null ? userStage : DEFAULT_STAGE;
     if (typeOf(stage) === 'number') {
         const stagePlugin = resolve(`@babel/preset-stage-${stage}`);
@@ -51,7 +62,7 @@ export default function createBabelConfig(userConfig, externalConfig = {}) {
             presets.push(stagePlugin);
         }
     }
-    
+
     presets = [...presets, ...userPresets];
     plugins = [...plugins, ...userPlugins];
 
@@ -62,7 +73,7 @@ export default function createBabelConfig(userConfig, externalConfig = {}) {
         babelrc: false
     };
 
-    config = merge(config, externalConfig);
+    config = merge(config, otherExternalConfig);
 
     if (typeOf(userConfigFn) === 'function') {
         config = userConfigFn(config);
@@ -71,6 +82,6 @@ export default function createBabelConfig(userConfig, externalConfig = {}) {
             process.exit(1);
         }
     }
-    
+
     return config;
 }

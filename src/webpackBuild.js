@@ -3,43 +3,27 @@ import webpack from 'webpack';
 import rm from 'rimraf';
 import path from 'path';
 import chalk from 'chalk';
-import ProgressBarPlugin from 'progress-bar-webpack-plugin';
-import createBuildWebpackConfig from './createBuildWebpackConfig';
+import createWebpackConfig from './createWebpackConfig';
 import { getUserConfig } from './user';
-import { error, info } from './utils';
-import { DEFAULT_OUTPUT_PATH } from './constant';
-export default function webpackBuild(args, externalConfig) {
+import { error, info, typeOf } from './utils';
+export default function webpackBuild(args, buildConfig) {
     process.env.NODE_ENV = 'production';
-    const cwd = process.cwd();
 
     const userConfig = getUserConfig(args);
-    /* const spinner = ora({
-        spinner: 'line',
-        text: chalk.cyan('building...')
-    }).start(); */
 
-    const webpackConfig = createBuildWebpackConfig(userConfig, {
-        plugins: [
-            new ProgressBarPlugin({
-                format: chalk.cyan('building [:bar]:percent'),
-                summary: false
-            })
-        ],
-        ...externalConfig,
-    });
-    // console.log(JSON.stringify(webpackConfig, null, 4))
+    if (typeOf(buildConfig) === 'function') {
+        buildConfig = buildConfig(userConfig);
+    }
 
-    const {
-        webpack: {
-            outputPath = DEFAULT_OUTPUT_PATH
-        }
-    } = userConfig;
+    const webpackConfig = createWebpackConfig(userConfig, buildConfig);
+    // console.log(webpackConfig)
+    
     let compiler = webpack(webpackConfig);
+
     return new Promise((resolve, reject) => {
-        rm(path.join(cwd, outputPath), err => {
+        rm(webpackConfig.output.path, err => {
             if (err) throw err;
             compiler.run((err, stats) => {
-                // spinner.stop();
                 if (err) {
                     error(err.stack || err);
                     if (err.details) {
